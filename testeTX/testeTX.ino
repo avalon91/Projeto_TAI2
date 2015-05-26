@@ -32,23 +32,25 @@ void setup(){
 void loop(){
   if(Serial.available() > 0){
     int c = Serial.read();
-    if(c == 20){
+    if(c == 3){
       vai = 20;
       radio.openWritingPipe(pipes[0]);
       radio.startWrite(&vai, sizeof(vai));
     }
-    if(c == 21){
+    if(c == 4){
       vai = 21;
       radio.openWritingPipe(pipes[0]);
       radio.startWrite(&vai, sizeof(vai));
     }
-    if(c == 10){
+    if(c == 1){
       vai = 10;
+      Serial.println("Foi");
       radio.openWritingPipe(pipes[1]);
       radio.startWrite(&vai, sizeof(vai));
     }
-    if(c == 11){
+    if(c == 2){
       vai = 11;
+      Serial.println("Foi");
       radio.openWritingPipe(pipes[1]);
       radio.startWrite(&vai, sizeof(vai));
     }
@@ -84,6 +86,4 @@ void radioReceive(){
       Serial.println(veio[2]);
     }
   }
-  if(tx)
-    Serial.println("Foi");
 }

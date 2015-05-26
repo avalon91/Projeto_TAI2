@@ -17,6 +17,7 @@ int foi;
 int array[] = {1,0,0};
 
 void setup(){
+  pinMode(8, OUTPUT);
   Serial.begin(9600);
   radio.begin();
   radio.enableAckPayload();
@@ -29,7 +30,6 @@ void setup(){
   radio.openReadingPipe(1, pipe);
   radio.startListening();
   attachInterrupt(0, radioReceive, FALLING);
-  pinMode(8, OUTPUT);
 }
 
 void loop(){
