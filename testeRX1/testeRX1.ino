@@ -1,3 +1,10 @@
+/*
+
+Arduinos com módulo RF e relé. Porta 8 conectada no SINAL do relé e
+5V na porta A3.
+
+*/
+
 #include <SPI.h>
 #include "RF24.h"
 #include "nRF24L01.h"
@@ -7,7 +14,7 @@ RF24 radio(9,10);
 const uint64_t pipe = 0x78787878E1LL;
 
 int foi;
-int array[] = {1,10};
+int array[] = {1,0,0};
 
 void setup(){
   Serial.begin(9600);
@@ -22,8 +29,7 @@ void setup(){
   radio.openReadingPipe(1, pipe);
   radio.startListening();
   attachInterrupt(0, radioReceive, FALLING);
-  //pinMode(3, OUTPUT);
-  //digitalWrite(3, LOW);
+  pinMode(8, OUTPUT);
 }
 
 void loop(){
@@ -34,19 +40,20 @@ void radioReceive(){
   bool tx,fail,rx;
   radio.whatHappened(tx,fail,rx);
   if(rx){
-    Serial.println("Chegou");
+    //Serial.println("Chegou");
     radio.read(&foi, sizeof(int));
+
     if(foi == 10){
-      array[1] = foi+1;
+      digitalWrite(8, LOW);
+      array[1] = 0;
+      array[2] = analogRead(3);
       radio.writeAckPayload(1, &array, sizeof(array));
     }
-    /*if(go == '3'){
-      Serial.println("3");
-      digitalWrite(3, HIGH);
+    if(foi == 11){
+      digitalWrite(8, HIGH);
+      array[1] = 1;
+      array[2] = analogRead(3);
+      radio.writeAckPayload(1, &array, sizeof(array));
     }
-    if(go == '4'){
-      Serial.println("4");
-      digitalWrite(3, LOW);
-    }*/
   }
 }

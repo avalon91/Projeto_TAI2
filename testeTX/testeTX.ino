@@ -1,3 +1,10 @@
+/*
+
+Arduinos com módulo RF e relé. Porta 8 conectada no SINAL do relé e
+5V na porta A3.
+
+*/
+
 #include <SPI.h>
 #include "RF24.h"
 #include "nRF24L01.h"
@@ -6,8 +13,8 @@ RF24 radio(9,10);
 
 const uint64_t pipes[] = {0x78787878A3LL, 0x78787878E1LL};
 
-int vai = 10;
-int veio[] = {0,0};
+int vai;
+int veio[] = {0,0,0};
 
 void setup(){
   Serial.begin(9600);
@@ -19,21 +26,29 @@ void setup(){
   radio.setPALevel(RF24_PA_MAX);
   radio.setDataRate(RF24_250KBPS);
   radio.setCRCLength(RF24_CRC_16);
-  //radio.openReadingPipe(1, pipe);
-  //radio.startListening();
   attachInterrupt(0, radioReceive, FALLING);
-  //pinMode(3, OUTPUT);
-  //digitalWrite(3, LOW);
 }
 
 void loop(){
   if(Serial.available() > 0){
-    char c = Serial.read();
-    if(c == '2'){
+    int c = Serial.read();
+    if(c == 20){
+      vai = 20;
       radio.openWritingPipe(pipes[0]);
       radio.startWrite(&vai, sizeof(vai));
     }
-    if(c == '1'){
+    if(c == 21){
+      vai = 21;
+      radio.openWritingPipe(pipes[0]);
+      radio.startWrite(&vai, sizeof(vai));
+    }
+    if(c == 10){
+      vai = 10;
+      radio.openWritingPipe(pipes[1]);
+      radio.startWrite(&vai, sizeof(vai));
+    }
+    if(c == 11){
+      vai = 11;
       radio.openWritingPipe(pipes[1]);
       radio.startWrite(&vai, sizeof(vai));
     }
@@ -44,23 +59,31 @@ void radioReceive(){
   bool tx,fail,rx;
   radio.whatHappened(tx,fail,rx);
   if(rx){
-    Serial.println("Chegou");
+    //Serial.println("Chegou");
     radio.read(&veio, sizeof(veio));
+
     if(veio[0] == 1){
-      Serial.print("Chegou de 1: ");
-      Serial.println(veio[1]);
+      Serial.println("Chegou de 1: ");
+      if(veio[1] == 1){
+        Serial.println("Lampada acesa");
+      } else if(veio[1] == 0){
+        Serial.println("Lampada apagada");
+      }
+      Serial.print("Leitura de A3: ");
+      Serial.println(veio[2]);
     }
+
     if(veio[0] == 2){
       Serial.print("Chegou de 2: ");
-      Serial.println(veio[1]);
+      if(veio[1] == 1){
+        Serial.println("Lampada acesa");
+      } else if(veio[1] == 0){
+        Serial.println("Lampada apagada");
+      }
+      Serial.print("Leitura de A3: ");
+      Serial.println(veio[2]);
     }
-    /*if(go == '1'){
-      Serial.println("1");
-      digitalWrite(3, HIGH);
-    }
-    if(go == '2'){
-      Serial.println("2");
-      digitalWrite(3, LOW);
-    }*/
   }
+  if(tx)
+    Serial.println("Foi");
 }
