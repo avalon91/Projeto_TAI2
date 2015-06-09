@@ -37,7 +37,7 @@ void loop() {
 	}
 	delay(200);
 	//irrecv.resume(); // Receive the next value
-  	//blinkStatus(3);
+  	blinkStatus(3);
 }
 
 void select(decode_results results){
