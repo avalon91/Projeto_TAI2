@@ -11,9 +11,11 @@ const uint64_t pipe = 0x78787878E1LL;
 
 //int PinIR = 3; Def na Lib.
 int RECV_PIN = 4;
+int PIN_BR = 8;
 int PIN_AZ = 9;
 int PIN_VD = 10;
 int PIN_VM = 11;
+bool Rele = false;
 
 int foi;
 int array[] = {1,10};
@@ -29,9 +31,11 @@ void LGEnergySaving();
 void setup()
 {
 	irrecv.enableIRIn(); // Start the receiver
+	pinMode(PIN_BR, OUTPUT);
 	pinMode(PIN_AZ, OUTPUT);
 	pinMode(PIN_VD, OUTPUT);
 	pinMode(PIN_VM, OUTPUT);
+	digitalWrite(PIN_BR, LOW);
 	digitalWrite(PIN_AZ, LOW);
 	digitalWrite(PIN_VD, LOW);
 	digitalWrite(PIN_VM, LOW);
@@ -52,13 +56,16 @@ void setup()
 void loop() {
   	if (irrecv.decode(&results)) {
   		blinkStatus(1);
+  		Serial.print(results.value);
+  		Serial.print("   ");
   		select(results);
   		blinkStatus(2);
   		//results.value=0;
 	}
 	delay(200);
+	irrecv.enableIRIn();
 	//irrecv.resume(); // Receive the next value
-  	//blinkStatus(3);
+  	blinkStatus(3);
 }
 
 void select(decode_results results){
@@ -69,8 +76,16 @@ void select(decode_results results){
 	    case 16736925://Mode
 	      irsend.sendNEC(0x20DF0CF3,32);
 	      break;
+	    //case 4294967295:// Alternativo
 	    case 16769565://Mute
-	      irsend.sendNEC(0x20DF906F,32);
+	      //irsend.sendNEC(0x20DF906F,32);
+	      irsend.sendSony(0xa90,12);
+	      if(Rele)
+	      	digitalWrite(PIN_BR, 0);
+	      else
+	      	digitalWrite(PIN_BR, 100);
+	      	Rele=!Rele;
+	      Serial.println("foi");
 	   	  break;
 	   	case 16720605://Play/Pause
 	      irsend.sendNEC(0x20DF22DD,32);
@@ -121,6 +136,11 @@ void select(decode_results results){
 
 void blinkStatus(int op){
 	switch (op) {
+		case 0: //Branco = Status
+	        digitalWrite(PIN_BR, 100);
+		    delay(100);
+		    digitalWrite(PIN_BR, 0);
+	      break;
 	    case 1: //Azul = Enviado
 	        digitalWrite(PIN_AZ, 100);
 		    delay(100);
